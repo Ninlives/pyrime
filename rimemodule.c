@@ -75,7 +75,8 @@ rime_get_candidates_from_keys(PyObject* self, PyObject* args) {
     }
 
     const char* key_sequence;
-    if (!PyArg_ParseTuple(args, "s", &key_sequence)) {
+    const int max_candidates;
+    if (!PyArg_ParseTuple(args, "si", &key_sequence, &max_candidates)) {
         Py_RETURN_NONE;
     }
     RimeSessionId session_id = RimeCreateSession();
@@ -125,6 +126,9 @@ rime_get_candidates_from_keys(PyObject* self, PyObject* args) {
             Py_DECREF(order);
 
             count++;
+            if (count >= max_candidates) {
+                goto finish;
+            }
         }
 
         if (context.menu.is_last_page) {
@@ -137,6 +141,7 @@ rime_get_candidates_from_keys(PyObject* self, PyObject* args) {
         RimeGetContext(session_id, &context);
     }
 
+finish:
     Py_DECREF(textKey);
     Py_DECREF(commentKey);
     Py_DECREF(orderKey);
